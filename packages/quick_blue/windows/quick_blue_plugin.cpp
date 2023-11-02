@@ -363,8 +363,6 @@ void QuickBluePlugin::HandleMethodCall(
     auto deviceId = std::get<std::string>(args[EncodableValue("deviceId")]);
     auto service = std::get<std::string>(args[EncodableValue("service")]);
     auto characteristic = std::get<std::string>(args[EncodableValue("characteristic")]);
-    auto value = std::get<std::vector<uint8_t>>(args[EncodableValue("value")]);
-    auto bleOutputProperty = std::get<std::string>(args[EncodableValue("bleOutputProperty")]);
     auto it = connectedDevices.find(std::stoull(deviceId));
     if (it == connectedDevices.end()) {
       result->Error("IllegalArgument", "Unknown devicesId:" + deviceId);
