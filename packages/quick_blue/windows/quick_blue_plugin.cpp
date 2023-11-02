@@ -221,6 +221,10 @@ void QuickBluePlugin::RegisterWithRegistrar(
       std::make_unique<flutter::MethodChannel<EncodableValue>>(
           registrar->messenger(), "quick_blue/method",
           &flutter::StandardMethodCodec::GetInstance());
+  auto event_availability_change =
+      std::make_unique<flutter::EventChannel<EncodableValue>>(
+          registrar->messenger(), "quick_blue/event.availabilityChange",
+          &flutter::StandardMethodCodec::GetInstance());        
   auto event_scan_result =
       std::make_unique<flutter::EventChannel<EncodableValue>>(
           registrar->messenger(), "quick_blue/event.scanResult",
@@ -263,6 +267,7 @@ void QuickBluePlugin::RegisterWithRegistrar(
           -> std::unique_ptr<flutter::StreamHandlerError<>> {
         return plugin_pointer->OnCancel(arguments);
       });
+  event_availability_change->SetStreamHandler(std::move(availability_handler));    
   event_scan_result->SetStreamHandler(std::move(handler));
 
   plugin->message_connector_ = std::move(message_connector_);
@@ -358,6 +363,8 @@ void QuickBluePlugin::HandleMethodCall(
     auto deviceId = std::get<std::string>(args[EncodableValue("deviceId")]);
     auto service = std::get<std::string>(args[EncodableValue("service")]);
     auto characteristic = std::get<std::string>(args[EncodableValue("characteristic")]);
+    auto value = std::get<std::vector<uint8_t>>(args[EncodableValue("value")]);
+    auto bleOutputProperty = std::get<std::string>(args[EncodableValue("bleOutputProperty")]);
     auto it = connectedDevices.find(std::stoull(deviceId));
     if (it == connectedDevices.end()) {
       result->Error("IllegalArgument", "Unknown devicesId:" + deviceId);
