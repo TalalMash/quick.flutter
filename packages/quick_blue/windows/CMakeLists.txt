@@ -6,12 +6,21 @@ set(PLUGIN_NAME "${PROJECT_NAME}_plugin")
 
 find_program(NUGET_EXE NAMES nuget)
 if(NOT NUGET_EXE)
-	message("NUGET.EXE not found.")
-	message(FATAL_ERROR "Please install this executable, and run CMake again.")
+  message("NUGET.EXE not found.")
+  message(FATAL_ERROR "Please install this executable, and run CMake again.")
 endif()
 
-exec_program(${NUGET_EXE}
-    ARGS install "Microsoft.Windows.CppWinRT" -Version 2.0.201102.2 -ExcludeVersion -OutputDirectory ${CMAKE_BINARY_DIR}/packages)
+# Replace exec_program with execute_process
+execute_process(
+  COMMAND ${NUGET_EXE} install "Microsoft.Windows.CppWinRT" -Version 2.0.201102.2 -ExcludeVersion -OutputDirectory ${CMAKE_BINARY_DIR}/packages
+  RESULT_VARIABLE result
+  WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+)
+
+# Check if the command was successful
+if(NOT result EQUAL 0)
+  message(FATAL_ERROR "Failed to install Microsoft.Windows.CppWinRT using nuget.")
+endif()
 
 add_library(${PLUGIN_NAME} SHARED
   "${PLUGIN_NAME}.cpp"
